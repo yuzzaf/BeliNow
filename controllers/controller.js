@@ -11,6 +11,9 @@ const { formatRupiah } = require("../helpers/formatRupiah");
 const { hashPassword, comparePassword } = require("../helpers/bcrypt");
 
 class Controller {
+  //---------
+  // Product
+  //---------
   static async productList(req, res) {
     try {
     } catch (error) {
@@ -47,6 +50,13 @@ class Controller {
       res.send(error);
     }
   }
+  //---------
+  // Product
+  //---------
+
+  //---------
+  // Category
+  //---------
   static async categoryList(req, res) {
     try {
     } catch (error) {
@@ -65,6 +75,14 @@ class Controller {
       res.send(error);
     }
   }
+
+  //---------
+  // Category
+  //---------
+
+  //---------
+  // Order
+  //---------
   static async orderList(req, res) {
     try {
     } catch (error) {
@@ -83,6 +101,15 @@ class Controller {
       res.send(error);
     }
   }
+
+  //---------
+  // Order
+  //---------
+
+  //---------
+  // Login, Register, Logout
+  //---------
+
   static async getLogin(req, res) {
     try {
     } catch (error) {
@@ -113,6 +140,15 @@ class Controller {
       res.send(error);
     }
   }
+
+  //---------
+  // Login, Register, Logout
+  //---------
+
+  //---------
+  // Delete
+  //---------
+
   static async deleteProduct(req, res) {
     try {
     } catch (error) {
