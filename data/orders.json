@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "userId": 1,
+    "quantity": 2,
+    "orderAddress": "Jakarta",
+    "orderDate": "2026-02-23"
+  },
+  {
+    "id": 2,
+    "userId": 1,
+    "quantity": 1,
+    "orderAddress": "Bandung",
+    "orderDate": "2026-02-23"
+  }
+]
