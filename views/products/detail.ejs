@@ -1,0 +1,48 @@
+<div class="row">
+
+  <!-- Image -->
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0">
+      <img src="<%= data.imageUrl %>" 
+           class="img-fluid rounded"
+           alt="<%= data.name %>">
+    </div>
+  </div>
+
+  <div class="col-md-6">
+
+    <h2 class="fw-bold"><%= data.name %></h2>
+
+    <h4 class="text-muted mb-3">
+      <%= formatRupiah(data.price) %>
+    </h4>
+
+    <% if (data.Categories && data.Categories.length) { %>
+        <p>
+            <strong>Category:</strong>
+            <%=   data.Categories.map(c => c.name).join(", ") %>
+        </p>
+    <% } %>
+
+    <hr>
+    <h3>Description</h3>
+    <p><%=   data.description %></p>
+
+    <div class="mt-4 d-flex gap-2">
+
+      <a href="/products" class="btn btn-outline-secondary">
+        Back
+      </a>
+
+      <% if (user && user.role === "admin") { %>
+        <a href="/products/<%=   data.id %>/edit" 
+           class="btn btn-primary">
+          Edit Product
+        </a>
+      <% } %>
+
+    </div>
+
+  </div>
+
+</div>
