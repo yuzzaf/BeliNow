@@ -18,11 +18,15 @@ module.exports = (sequelize, DataTypes) => {
       email: DataTypes.STRING,
       password: DataTypes.STRING,
       role: DataTypes.STRING,
-    },
-    {
+    }, {
+      hooks : {
+        beforeCreate( User, options){
+          const hashed = bcrypt.hashSync(User.password, 10)
+          User.password = hashed
+        }
+      },
       sequelize,
       modelName: "User",
-    },
-  );
+    });
   return User;
 };
