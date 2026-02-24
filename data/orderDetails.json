@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "orderId": 1,
+    "productId": 1,
+    "price": 15000000,
+    "quantity": 1,
+    "status": "paid"
+  },
+  {
+    "id": 2,
+    "orderId": 1,
+    "productId": 2,
+    "price": 750000,
+    "quantity": 1,
+    "status": "paid"
+  },
+  {
+    "id": 3,
+    "orderId": 2,
+    "productId": 3,
+    "price": 300000,
+    "quantity": 1,
+    "status": "pending"
+  }
+]

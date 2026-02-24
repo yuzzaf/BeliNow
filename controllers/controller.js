@@ -112,77 +112,60 @@ class Controller {
 
   static async getLogin(req, res) {
     try {
-      res.render('login.ejs')
-    } catch (error) {
-      console.log(error);      
-      res.send(error);
-    }
-  }
-  static async postLogin(req, res) {
-    try {
-      const { email, password } = req.body
-
-            console.log("LOGIN INPUT:", email)
-
-            const user = await User.findOne({ where: { email } })
-
-            if (!user) {
-            console.log("USER NOT FOUND")
-            return res.redirect('/login')
-            }
-
-            const isValid = bcrypt.compareSync(password, user.password)
-
-            if (!isValid) {
-            console.log("PASSWORD WRONG")
-            return res.redirect('/login')
-            }
-
-            req.session.userId = user.id
-            req.session.role = user.role
-
-            console.log("LOGIN SUCCESS")
-
-            return res.redirect('/products')
+      res.render("auth/login");
     } catch (error) {
       console.log(error);
       res.send(error);
     }
   }
+  static async postLogin(req, res) {
+    try {
+      const { email, password } = req.body;
+
+      const user = await User.login({ email, password });
+
+      req.session.userId = user.id;
+      req.session.role = user.role;
+
+      return res.redirect("/products");
+    } catch (error) {
+      return res.redirect("/login?error=" + error.message);
+    }
+  }
   static async getRegister(req, res) {
     try {
-      res.render('register.ejs')
+      res.render("auth/register");
     } catch (error) {
       res.send(error);
     }
   }
   static async postRegister(req, res) {
     try {
-      const { email, password, role } = req.body
+      const { username, email, password, role } = req.body;
 
-        // basic validation
-        if (!email || !password || !role) {
-            return res.send('All fields are required')
-        }
+      // create user (password di-hash oleh model hook)
+      await User.create({
+        username,
+        email,
+        password,
+        role,
+      });
 
-        // create user (password di-hash oleh model hook)
-        await User.create({
-            email,
-            password,
-            role
-        })
-
-        // redirect ke login setelah sukses
-        res.redirect('/login')
+      // redirect ke login setelah sukses
+      res.redirect("/login");
     } catch (error) {
-      console.log(error);
+      if (error.name === "SequelizeValidationError") {
+        const errors = error.errors.map((el) => el.message);
+        return res.redirect("/register?error=" + errors.join(", "));
+      }
       res.send(error);
     }
   }
-  static logout(req, res) { //logout
-        req.session.destroy(() => {
-      res.redirect('login.ejs')
-    })
+  static logout(req, res) {
+    //logout
+    req.session.destroy(() => {
+      res.redirect("auth/login");
+    });
   }
 
   //---------
