@@ -112,33 +112,77 @@ class Controller {
 
   static async getLogin(req, res) {
     try {
+      res.render('login.ejs')
     } catch (error) {
+      console.log(error);      
       res.send(error);
     }
   }
   static async postLogin(req, res) {
     try {
+      const { email, password } = req.body
+
+            console.log("LOGIN INPUT:", email)
+
+            const user = await User.findOne({ where: { email } })
+
+            if (!user) {
+            console.log("USER NOT FOUND")
+            return res.redirect('/login')
+            }
+
+            const isValid = bcrypt.compareSync(password, user.password)
+
+            if (!isValid) {
+            console.log("PASSWORD WRONG")
+            return res.redirect('/login')
+            }
+
+            req.session.userId = user.id
+            req.session.role = user.role
+
+            console.log("LOGIN SUCCESS")
+
+            return res.redirect('/products')
     } catch (error) {
+      console.log(error);
       res.send(error);
     }
   }
   static async getRegister(req, res) {
     try {
+      res.render('register.ejs')
     } catch (error) {
       res.send(error);
     }
   }
   static async postRegister(req, res) {
     try {
+      const { email, password, role } = req.body
+
+        // basic validation
+        if (!email || !password || !role) {
+            return res.send('All fields are required')
+        }
+
+        // create user (password di-hash oleh model hook)
+        await User.create({
+            email,
+            password,
+            role
+        })
+
+        // redirect ke login setelah sukses
+        res.redirect('/login')
     } catch (error) {
+      console.log(error);
       res.send(error);
     }
   }
-  static async logout(req, res) {
-    try {
-    } catch (error) {
-      res.send(error);
-    }
+  static logout(req, res) { //logout
+        req.session.destroy(() => {
+      res.redirect('login.ejs')
+    })
   }
 
   //---------
