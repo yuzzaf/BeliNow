@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "name": "Laptop Gaming",
+    "price": 15000000,
+    "imageUrl": "laptop.jpg",
+    "description": "High performance gaming laptop",
+    "categoryId": 1,
+    "stock": 10
+  },
+  {
+    "id": 2,
+    "name": "Sneakers White",
+    "price": 750000,
+    "imageUrl": "shoes.jpg",
+    "description": "Comfortable daily sneakers",
+    "categoryId": 2,
+    "stock": 25
+  },
+  {
+    "id": 3,
+    "name": "Clean Code Book",
+    "price": 300000,
+    "imageUrl": "book.jpg",
+    "description": "Programming best practice book",
+    "categoryId": 3,
+    "stock": 15
+  }
+]

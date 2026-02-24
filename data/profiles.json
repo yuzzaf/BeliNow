@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "firstName": "Muhammad",
+    "lastName": "Yuzzaf",
+    "address": "Jakarta",
+    "userId": 1
+  },
+  {
+    "id": 2,
+    "firstName": "Admin",
+    "lastName": "Store",
+    "address": "Bandung",
+    "userId": 2
+  }
+]
