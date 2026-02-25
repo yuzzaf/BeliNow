@@ -23,7 +23,9 @@ module.exports = (sequelize, DataTypes) => {
       return user;
     }
     static associate(models) {
-      User.hasOne(models.Profile);
+      User.hasOne(models.Profile, {
+        foreignKey: "userId",
+      });
       User.hasMany(models.Order);
     }
   }

@@ -23,8 +23,24 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false,
+      maxAge: 1000 * 60 * 1,
+    },
   }),
 );
+
+app.use((req, res, next) => {
+  res.locals.user = req.session.userId
+    ? {
+        id: req.session.userId,
+        role: req.session.role,
+        username: req.session.username,
+      }
+    : null;
+  next();
+});
 
 // Static folder (css, images, etc)
 // app.use(express.static(path.join(__dirname, "public")));
@@ -50,17 +66,17 @@ app.use((req, res) => {
 });
 
 // ======================
-// SERVER
-// ======================
-
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
-
-// ======================
 // SERVER ERROR
 // ======================
 app.use((err, req, res, next) => {
   console.log(err);
   res.status(500).send("Internal Server Error");
+});
+
+// ======================
+// SERVER
+// ======================
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });

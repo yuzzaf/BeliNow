@@ -1,10 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Controller = require("../controllers/controller");
+const { isLoggedIn } = require("../middlewares/middleware");
 
-router.get("/", Controller.categoryList);
-
-router.get("/add", Controller.getAddCategory);
-router.post("/add", Controller.postAddCategory);
+router.get("/", isLoggedIn, Controller.getProfile);
 
 module.exports = router;

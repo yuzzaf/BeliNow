@@ -7,6 +7,12 @@
     <a href="/products/add" class="btn btn-dark mt-2">Add New Product</a>
   </div>
 
+  <form method="GET" action="/products" class="mb-4">
+    <div class="input-group">
+      <input type="text" name="search" class="form-control" placeholder="Search" value="<%= search || '' %>">
+      <button class="btn btn-dark">Search</button>
+    </div>
+  </form>
   <% if (!data || data.length === 0) { %>
 
     <div class="alert alert-warning text-center">

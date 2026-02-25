@@ -3,13 +3,46 @@
     class="container"
     style="display: flex; justify-content: space-between; align-items: center"
   >
+    <!-- Brand -->
     <h2 style="margin: 0">
-      <a href="/products" style="color: white">BeliNow</a>
+      <a href="/products" style="color: white; text-decoration: none">
+        BeliNow
+      </a>
     </h2>
 
-    <div style="display: flex; gap: 20px">
-      <a href="/products" style="color: white">Products</a>
-      <a href="/products/add" style="color: white">Add Product</a>
+    <!-- Menu -->
+    <div style="display: flex; gap: 20px; align-items: center">
+
+      <a href="/products" style="color: white; text-decoration: none">
+        Products
+      </a>
+
+      <% if (user && user.role === "admin") { %>
+        <a href="/products/add" style="color: white; text-decoration: none">
+          Add Product
+        </a>
+      <% } %>
+
+      <% if (!user) { %>
+        <!-- Belum Login -->
+        <a href="/login" style="color: white; text-decoration: none">
+          Login
+        </a>
+        <a href="/register" style="color: white; text-decoration: none">
+          Register
+        </a>
+
+      <% } else { %>
+        <!-- Sudah Login -->
+        <span style="color: #ccc;">
+          👋 <%= user.username %>
+        </span>
+
+        <a href="/logout" style="color: #ff6b6b; text-decoration: none">
+          Logout
+        </a>
+      <% } %>
+
     </div>
   </div>
 </nav>
