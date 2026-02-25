@@ -51,20 +51,34 @@ class Controller {
   }
   static async getAddProduct(req, res) {
     try {
+      let dataProduct = await Product.findAll()
       let categories = await Category.findAll()
-      res.render("products/add", {categories})
+      res.render("products/add", {dataProduct, categories, title:"Add Product"})
     } catch (error) {
       res.send(error);
     }
   }
   static async postAddProduct(req, res) {
     try {
+      await Product.create({ 
+                name: req.body.name,
+                price: req.body.price,
+                imageUrl: req.body.imageUrl,
+                description: req.body.description,
+                categoryId: req.body.categoryId,
+                stock: req.body.stock 
+            });
+      res.redirect('/products')
     } catch (error) {
       res.send(error);
     }
   }
   static async getEditProduct(req, res) {
     try {
+      let idProduct = req.params.id
+      let product = await Product.findByPk(idProduct)
+                      
+            res.render('editPage', {idProduct, product} )
     } catch (error) {
       res.send(error);
     }
