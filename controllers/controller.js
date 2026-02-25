@@ -8,7 +8,6 @@ const {
   User,
 } = require("../models");
 const { formatRupiah } = require("../helpers/formatRupiah");
-const { hashPassword, comparePassword } = require("../helpers/bcrypt");
 
 class Controller {
   //---------
@@ -16,14 +15,38 @@ class Controller {
   //---------
   static async productList(req, res) {
     try {
+      let data = await Product.findAll({
+        include: Category,
+
+        order: [["createdAt", "DESC"]],
+        limit: 8,
+      });
+
+      res.render("products/index", {
+        data,
+        title: "All Products",
+        formatRupiah,
+      });
     } catch (error) {
       res.send(error);
     }
   }
   static async productDetail(req, res) {
     try {
+      const { id } = req.params;
+
+      const data = await Product.findByPk(id, {
+        include: Category,
+      });
+
+      res.render("products/detail", {
+        data,
+        title: data.name,
+        user: req.session,
+        formatRupiah,
+      });
     } catch (error) {
-      res.send(error);
+      res.redirect("/products?error=" + encodeURIComponent(error.message));
     }
   }
   static async getAddProduct(req, res) {
@@ -112,7 +135,7 @@ class Controller {
 
   static async getLogin(req, res) {
     try {
-      res.render("auth/login");
+      res.render("auth/login", { title: "Login" });
     } catch (error) {
       console.log(error);
       res.send(error);
@@ -124,6 +147,10 @@ class Controller {
 
       const user = await User.login({ email, password });
 
+      if (!user) {
+        throw new Error("Invalid email or password");
+      }
+
       req.session.userId = user.id;
       req.session.role = user.role;
 
@@ -134,7 +161,7 @@ class Controller {
   }
   static async getRegister(req, res) {
     try {
-      res.render("auth/register");
+      res.render("auth/register", { title: "Register" });
     } catch (error) {
       res.send(error);
     }

@@ -13,8 +13,11 @@
   "type": "commonjs",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "dotenv": "^17.3.1",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.19.0",
     "pg": "^8.18.0",
     "sequelize": "^6.37.7",
     "stripe": "^20.3.1"
