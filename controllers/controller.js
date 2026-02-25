@@ -51,6 +51,8 @@ class Controller {
   }
   static async getAddProduct(req, res) {
     try {
+      let categories = await Category.findAll()
+      res.render("products/add", {categories})
     } catch (error) {
       res.send(error);
     }

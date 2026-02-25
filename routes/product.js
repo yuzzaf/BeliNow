@@ -5,12 +5,13 @@ const Controller = require("../controllers/controller");
 // List
 router.get("/", Controller.productList);
 
-// Detail
-router.get("/:id", Controller.productDetail);
 
 // Add
 router.get("/add", Controller.getAddProduct);
 router.post("/add", Controller.postAddProduct);
+
+// Detail
+router.get("/:id", Controller.productDetail);
 
 // Edit
 router.get("/:id/edit", Controller.getEditProduct);
