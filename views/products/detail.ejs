@@ -34,6 +34,8 @@
         Back
       </a>
 
+      <a href="/orders/create/<%= data.id %>">add to cart</a>
+
       <% if (user && user.role === "admin") { %>
         <a href="/products/<%=   data.id %>/edit" 
            class="btn btn-primary">

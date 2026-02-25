@@ -18,6 +18,6 @@ router.get("/:id/edit", Controller.getEditProduct);
 router.post("/:id/edit", Controller.postEditProduct);
 
 // Delete
-router.post("/:id/delete", Controller.deleteProduct);
+router.get("/:id/delete", Controller.deleteProduct);
 
 module.exports = router;

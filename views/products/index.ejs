@@ -7,6 +7,8 @@
     <a href="/products/add" class="btn btn-dark mt-2">Add New Product</a>
   </div>
 
+  <a href="/orders">Shopping Cart</a>
+
   <% if (!data || data.length === 0) { %>
 
     <div class="alert alert-warning text-center">
@@ -42,7 +44,7 @@
                 </p>
               <% } %>
 
-              <div class="mt-auto d-flex justify-content-between">
+              <div class="mt-auto d-flex justify-content-end gap-2">
 
                 <a href="/products/<%= product.id %>" 
                    class="btn btn-sm btn-outline-primary">
@@ -52,6 +54,11 @@
                 <a href="/products/<%= product.id %>/edit" 
                    class="btn btn-sm btn-outline-success">
                   Edit
+                </a>
+
+                <a href="/products/<%= product.id %>/delete" 
+                   class="btn btn-sm btn-outline-danger">
+                  Delete
                 </a>
 
               </div>
