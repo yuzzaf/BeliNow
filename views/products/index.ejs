@@ -7,6 +7,12 @@
     <a href="/products/add" class="btn btn-dark mt-2">Add New Product</a>
   </div>
 
+  <form method="GET" action="/products" class="mb-4">
+    <div class="input-group">
+      <input type="text" name="search" class="form-control" placeholder="Search" value="<%= search || '' %>">
+      <button class="btn btn-dark">Search</button>
+    </div>
+  </form>
 
 <% if (notifDeleteProduct) { %>
   <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center justify-content-between mb-4"
@@ -75,10 +81,9 @@
                   Edit
                 </a>
 
-                <a href="/products/<%= product.id %>/delete" 
-                   class="btn btn-sm btn-outline-danger">
-                  🗑 Delete
-                </a>
+                <form method="POST" action="/products/<%= product.id %>/delete" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
 
               </div>
 

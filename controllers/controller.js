@@ -7,6 +7,7 @@ const {
   OrderDetail,
   User,
 } = require("../models");
+const { Op } = require("sequelize");
 const { formatRupiah } = require("../helpers/formatRupiah");
 const product = require("../models/product");
 
@@ -16,16 +17,27 @@ class Controller {
   //---------
   static async productList(req, res) {
     try {
+      let { search } = req.query;
       let notifDeleteProduct = req.query.message
 
       let data = await Product.findAll({
         include: Category,
 
+      let option = {
+        include: Category,
         order: [["createdAt", "DESC"]],
-        limit: 8,
-      });
+      };
 
-      res.render("products/index", {data, notifDeleteProduct, title: "All Products", formatRupiah,
+      if (search) {
+        option.where = {
+          name: {
+            [Op.iLike]: `%${search}%`,
+          },
+        };
+      }
+      let data = await Product.findAll(option);
+
+      res.render("products/index", {data, notifDeleteProduct, title: "All Products", formatRupiah, search
       });
     } catch (error) {
       res.send(error);
@@ -277,16 +289,15 @@ const order = await Order.findOne({
     try {
       const { email, password } = req.body;
 
-      const user = await User.login({ email, password });
-
-      if (!user) {
-        throw new Error("Invalid email or password");
-      }
-
-      req.session.userId = user.id;
-      req.session.role = user.role;
-
-      return res.redirect("/products");
+      User.login({ email, password }).then((user) => {
+        if (!user) {
+          throw new Error("Invalid email or password");
+        }
+        req.session.userId = user.id;
+        req.session.role = user.role;
+        req.session.username = user.username;
+        return res.redirect("/products");
+      });
     } catch (error) {
       return res.redirect("/login?error=" + error.message);
     }
@@ -302,12 +313,19 @@ const order = await Order.findOne({
     try {
       const { username, email, password, role } = req.body;
 
-      // create user (password di-hash oleh model hook)
-      await User.create({
+      const newUser = await User.create({
         username,
         email,
         password,
         role,
+      });
+
+      await Profile.create({
+        userId: newUser.id,
+        username: username,
+        firstName: "",
+        lastName: "",
+        address: "",
       });
 
       // redirect ke login setelah sukses
@@ -320,16 +338,133 @@ const order = await Order.findOne({
       res.send(error);
     }
   }
-  static logout(req, res) {
+  static async logout(req, res) {
     //logout
-    req.session.destroy(() => {
-      res.redirect("auth/login");
-    });
+    try {
+      req.session.destroy(() => {
+        res.redirect("/products");
+      });
+      res.clearCookie("connect.sid"); // hapus cookie
+      res.redirect("/login");
+    } catch (error) {
+      res.send(error);
+    }
   }
 
   //---------
   // Login, Register, Logout
   //---------
+
+  //---------
+  // Profiles
+  //---------
+
+  static async getProfile(req, res) {
+    try {
+      const { username } = req.params;
+
+      const user = await User.findOne({ where: { username } });
+      if (!user) return res.status(404).send("User not found");
+
+      await Profile.findOrCreate({
+        where: { userId: user.id },
+        defaults: {
+          username: user.username,
+          firstName: "",
+          lastName: "",
+          address: "",
+        },
+      });
+
+      // cek authorization
+      if (req.session.username !== username && req.session.role !== "admin") {
+        return res.redirect("/products");
+      }
+
+      const data = await Profile.findOne({
+        where: { userId: user.id },
+        include: User,
+      });
+
+      res.render("profiles/index", {
+        data,
+        title: `${username}'s Profile`,
+      });
+    } catch (error) {
+      res.send(error);
+    }
+  }
+
+  static async getProfileEdit(req, res) {
+    try {
+      const { username } = req.params;
+
+      if (req.session.username !== username && req.session.role !== "admin") {
+        return res.redirect("/products");
+      }
+
+      const user = await User.findOne({ where: { username } });
+      if (!user) return res.status(404).send("User not found");
+
+      await Profile.findOrCreate({
+        where: { userId: user.id },
+        defaults: {
+          firstName: "",
+          lastName: "",
+          address: "",
+        },
+      });
+
+      const data = await Profile.findOne({
+        where: { userId: user.id },
+        include: User,
+      });
+
+      res.render("profiles/edit", {
+        data,
+        title: `Edit ${username}'s Profile`,
+      });
+    } catch (error) {
+      res.send(error);
+    }
+  }
+
+  static async postProfileEdit(req, res) {
+    try {
+      const { username } = req.params;
+      const { username: newUsername, firstName, lastName, address } = req.body;
+
+      if (req.session.username !== username && req.session.role !== "admin") {
+        return res.redirect("/products");
+      }
+
+      const user = await User.findOne({ where: { username } });
+      if (!user) return res.status(404).send("User not found");
+
+      await Profile.findOrCreate({
+        where: { userId: user.id },
+        defaults: {
+          firstName: "",
+          lastName: "",
+          address: "",
+        },
+      });
+
+      await User.update({ username: newUsername }, { where: { id: user.id } });
+      await Profile.update(
+        { firstName, lastName, address },
+        { where: { userId: user.id } },
+      );
+
+      if (req.session.userId === user.id) {
+        req.session.username = newUsername;
+      }
+
+      return res.redirect(`/profiles/${newUsername}`);
+    } catch (error) {
+      res.send(error);
+    }
+  }
 
   //---------
   // Delete

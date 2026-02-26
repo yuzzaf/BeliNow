@@ -1,23 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const Controller = require("../controllers/controller");
+const { isLoggedIn } = require("../middlewares/middleware");
 
-// List
+// Public
 router.get("/", Controller.productList);
 
-
-// Add
+// Protected
+router.use(isLoggedIn);
 router.get("/add", Controller.getAddProduct);
 router.post("/add", Controller.postAddProduct);
-
-// Detail
-router.get("/:id", Controller.productDetail);
-
-// Edit
 router.get("/:id/edit", Controller.getEditProduct);
 router.post("/:id/edit", Controller.postEditProduct);
+router.post("/:id/delete", Controller.deleteProduct);
 
-// Delete
-router.get("/:id/delete", Controller.deleteProduct);
-
+// Public
+router.get("/:id", Controller.productDetail);
 module.exports = router;
