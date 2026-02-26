@@ -16,15 +16,25 @@
           <div class="card shadow-sm">
             <div class="card-body p-4">
               <h3 class="text-center mb-4">Register</h3>
+              <% if (errors && errors.length) { %>
+                <div class="alert alert-danger">
+                  <ul class="mb-0 ps-3">
+                    <% errors.forEach((err) => { %>
+                      <li><%= err %></li>
+                    <% }) %>
+                  </ul>
+                </div>
+              <% } %>
 
               <form method="POST" action="/register">
                 <div class="mb-3">
                   <label class="form-label">Username</label>
                   <input
-                    type="username"
+                    type="text"
                     name="username"
                     class="form-control"
                     placeholder="Enter your username"
+                    value="<%= formData?.username || '' %>"
                   />
                 </div>
 
@@ -35,6 +45,7 @@
                     name="email"
                     class="form-control"
                     placeholder="Enter your email"
+                    value="<%= formData?.email || '' %>"
                   />
                 </div>
 
@@ -52,8 +63,8 @@
                   <label class="form-label">Role</label>
                   <select name="role" class="form-select">
                     <option value="">-- Select Role --</option>
-                    <option value="buyer">Buyer</option>
-                    <option value="admin">Admin</option>
+                    <option value="buyer" <%= formData?.role === 'buyer' ? 'selected' : '' %>>Buyer</option>
+                    <option value="admin" <%= formData?.role === 'admin' ? 'selected' : '' %>>Admin</option>
                   </select>
                 </div>
 

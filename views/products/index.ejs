@@ -2,15 +2,36 @@
 
   <!-- Hero Section -->
   <div class="text-center mb-5">
-    <h1 class="fw-bold">Discover Our Products</h1>
-    <p class="text-muted">Find the best items with the best prices</p>
-    <a href="/products/add" class="btn btn-dark mt-2">Add New Product</a>
+    <% if (user && user.role === "admin") { %>
+      <h1 class="fw-bold">Manage Products</h1>
+      <p class="text-muted">Create, update, and organize your catalog</p>
+    <% } else { %>
+      <h1 class="fw-bold">Discover Our Products</h1>
+      <p class="text-muted">Find the best items with the best prices</p>
+    <% } %>
+    <% if (user && user.role === "admin") { %>
+      <a href="/products/add" class="btn btn-dark mt-2">Add New Product</a>
+    <% } %>
   </div>
 
   <form method="GET" action="/products" class="mb-4">
-    <div class="input-group">
-      <input type="text" name="search" class="form-control" placeholder="Search" value="<%= search || '' %>">
-      <button class="btn btn-dark">Search</button>
+    <div class="row g-2">
+      <div class="col-md-6">
+        <input type="text" name="search" class="form-control" placeholder="Search" value="<%= search || '' %>">
+      </div>
+      <div class="col-md-4">
+        <select name="categoryId" class="form-select">
+          <option value="">All Categories</option>
+          <% (categories || []).forEach(category => { %>
+            <option value="<%= category.id %>" <%= +categoryId === category.id ? "selected" : "" %>>
+              <%= category.name %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-dark">Filter</button>
+      </div>
     </div>
   </form>
 
@@ -31,8 +52,6 @@
   </div>
 <% } %>
 
-
-  <a href="/orders">Shopping Cart</a>
 
   <% if (!data || data.length === 0) { %>
 
@@ -69,24 +88,34 @@
                 </p>
               <% } %>
 
-              <div class="mt-auto d-flex justify-content-end gap-2">
-
+              <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
                 <a href="/products/<%= product.id %>" 
                    class="btn btn-sm btn-outline-primary">
                   Detail
                 </a>
 
-                <a href="/products/<%= product.id %>/edit" 
-                   class="btn btn-sm btn-outline-success">
-                  Edit
-                </a>
+                <% if (user && user.role === "admin") { %>
+                  <div class="d-flex gap-2">
+                    <a href="/products/<%= product.id %>/edit" 
+                      class="btn btn-sm btn-outline-success">
+                      Edit
+                    </a>
 
-                <form method="POST" action="/products/<%= product.id %>/delete" style="display:inline;">
-                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                </form>
+                    <form method="POST" action="/products/<%= product.id %>/delete" style="display:inline;">
+                      <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                  </div>
+                <% } %>
 
+                <% if (user && user.role !== "admin") { %>
+                  <form method="POST" action="/orders/create/<%= product.id %>" style="display:inline;" onsubmit="return handleAddToCartChoice(this);">
+                    <input type="hidden" name="next" value="orders">
+                    <button class="btn btn-sm btn-outline-primary" title="Add to Cart" aria-label="Add to Cart">
+                      <i class="bi bi-cart-plus"></i>
+                    </button>
+                  </form>
+                <% } %>
               </div>
-
             </div>
           </div>
         </div>
@@ -98,3 +127,13 @@
   <% } %>
 
 </div>
+
+<script>
+  function handleAddToCartChoice(form) {
+    var goToOrders = window.confirm(
+      "Item akan ditambahkan ke cart.\nPilih OK untuk langsung ke Orders, atau Cancel untuk tetap di Products."
+    );
+    form.querySelector('input[name=\"next\"]').value = goToOrders ? "orders" : "products";
+    return true;
+  }
+</script>
