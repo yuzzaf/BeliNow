@@ -18,6 +18,22 @@
 
   </div>
 
+  <% if (notifDeleteCategory) { %>
+  <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center justify-content-between mb-4"
+       role="alert"
+       style="border-radius: 10px;">
+
+    <div class="d-flex align-items-center gap-2">
+      <span style="font-size: 20px;">🗑️</span>
+      <div>
+        <strong>Category Deleted!</strong><br>
+        <small class="text-muted">
+          "<%= notifDeleteCategory %>"
+        </small>
+      </div>
+    </div>
+  </div>
+<% } %>
 
   <!-- Card -->
   <div class="card shadow-sm border-0">
@@ -40,6 +56,7 @@
               <tr>
                 <th style="width: 10%;">ID</th>
                 <th>Category Name</th>
+                <th class="text-end" style="width: 15%;">Action</th>
               </tr>
             </thead>
 
@@ -55,6 +72,12 @@
 
                   <td class="fw-semibold">
                     <%= category.name %>
+                  </td>
+                  <td class="text-end">
+                    <a href="/categories/<%= category.id %>/delete" 
+                      class="btn btn-sm btn-outline-danger">
+                      🗑 Delete
+                    </a>
                   </td>
 
                 </tr>
