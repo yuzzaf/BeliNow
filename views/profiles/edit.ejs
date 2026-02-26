@@ -1,0 +1,52 @@
+<h2 class="mb-4">Edit Profile</h2>
+
+<div class="card shadow-sm p-4">
+  <form method="POST" action="/profiles/<%= data.User.username %>/edit">
+    <div class="mb-3">
+      <label class="form-label">Username</label>
+      <input
+        type="text"
+        name="username"
+        class="form-control"
+        value="<%= data.User.username %>"
+        required
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">First Name</label>
+      <input
+        type="text"
+        name="firstName"
+        class="form-control"
+        value="<%= data.firstName || '' %>"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Last Name</label>
+      <input
+        type="text"
+        name="lastName"
+        class="form-control"
+        value="<%= data.lastName || '' %>"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Address</label>
+      <textarea name="address" class="form-control" rows="3">
+<%= data.address || '' %></textarea
+      >
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-dark">Save Changes</button>
+      <a
+        href="/profiles/<%= data.User.username %>"
+        class="btn btn-outline-secondary"
+        >Cancel</a
+      >
+    </div>
+  </form>
+</div>

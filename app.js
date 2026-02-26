@@ -1,36 +1,31 @@
-const express = require("express");
-const path = require("path");
-const expressLayouts = require("express-ejs-layouts");
-const session = require("express-session");
 require("dotenv").config();
 
-const app = express();
-const PORT = 3000;
-
-// Import Routes
+const express = require("express");
+const expressLayouts = require("express-ejs-layouts");
+const session = require("express-session");
 const routes = require("./routes");
 
-// ======================
-// MIDDLEWARE
-// ======================
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 // Body parser
 app.use(express.urlencoded({ extended: false }));
-// app.use(express.json());
 
+// Session
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || "dev-secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       secure: false,
-      maxAge: 1000 * 60 * 1,
+      maxAge: 1000 * 60 * 60, // 1 jam
     },
   }),
 );
 
+// User session ke view
 app.use((req, res, next) => {
   res.locals.user = req.session.userId
     ? {
@@ -42,40 +37,24 @@ app.use((req, res, next) => {
   next();
 });
 
-// Static folder (css, images, etc)
-// app.use(express.static(path.join(__dirname, "public")));
-
-// Set view engine
+// View engine
 app.set("view engine", "ejs");
 app.use(expressLayouts);
 app.set("layout", "layout");
-// app.set("views", path.join(__dirname, "views"));
 
-// ======================
-// ROUTES
-// ======================
-
+// Routes
 app.use(routes);
 
-// ======================
-// 404 HANDLER
-// ======================
-
+// 404 handler
 app.use((req, res) => {
   res.status(404).send("Page Not Found");
 });
 
-// ======================
-// SERVER ERROR
-// ======================
+// Error handler
 app.use((err, req, res, next) => {
-  console.log(err);
+  console.error(err);
   res.status(500).send("Internal Server Error");
 });
-
-// ======================
-// SERVER
-// ======================
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

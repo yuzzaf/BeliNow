@@ -34,9 +34,10 @@
 
       <% } else { %>
         <!-- Sudah Login -->
-        <span style="color: #ccc;">
+        <a href="/profiles/<%= user.username %>" 
+          style="color: #ccc; text-decoration: none;">
           👋 <%= user.username %>
-        </span>
+        </a>
 
         <a href="/logout" style="color: #ff6b6b; text-decoration: none">
           Logout

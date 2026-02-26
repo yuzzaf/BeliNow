@@ -181,12 +181,19 @@ class Controller {
     try {
       const { username, email, password, role } = req.body;
 
-      // create user (password di-hash oleh model hook)
-      await User.create({
+      const newUser = await User.create({
         username,
         email,
         password,
         role,
+      });
+
+      await Profile.create({
+        userId: newUser.id,
+        username: username,
+        firstName: "",
+        lastName: "",
+        address: "",
       });
 
       // redirect ke login setelah sukses
@@ -201,9 +208,15 @@ class Controller {
   }
   static async logout(req, res) {
     //logout
-    req.session.destroy(() => {
-      res.redirect("auth/login");
-    });
+    try {
+      req.session.destroy(() => {
+        res.redirect("/products");
+      });
+      res.clearCookie("connect.sid"); // hapus cookie
+      res.redirect("/login");
+    } catch (error) {
+      res.send(error);
+    }
   }
 
   //---------
@@ -216,22 +229,111 @@ class Controller {
 
   static async getProfile(req, res) {
     try {
-      const data = await Profile.findOne({
-        where: {
-          userId: req.session.userId,
+      const { username } = req.params;
+
+      const user = await User.findOne({ where: { username } });
+      if (!user) return res.status(404).send("User not found");
+
+      await Profile.findOrCreate({
+        where: { userId: user.id },
+        defaults: {
+          username: user.username,
+          firstName: "",
+          lastName: "",
+          address: "",
         },
+      });
+
+      // cek authorization
+      if (req.session.username !== username && req.session.role !== "admin") {
+        return res.redirect("/products");
+      }
+
+      const data = await Profile.findOne({
+        where: { userId: user.id },
         include: User,
       });
 
-      if (!data) {
-        return res.send("Profile not found");
-      }
-
-      res.render("profiles/index", { data, title: "Profiles" });
+      res.render("profiles/index", {
+        data,
+        title: `${username}'s Profile`,
+      });
     } catch (error) {
       res.send(error);
     }
   }
+
+  static async getProfileEdit(req, res) {
+    try {
+      const { username } = req.params;
+
+      if (req.session.username !== username && req.session.role !== "admin") {
+        return res.redirect("/products");
+      }
+
+      const user = await User.findOne({ where: { username } });
+      if (!user) return res.status(404).send("User not found");
+
+      await Profile.findOrCreate({
+        where: { userId: user.id },
+        defaults: {
+          firstName: "",
+          lastName: "",
+          address: "",
+        },
+      });
+
+      const data = await Profile.findOne({
+        where: { userId: user.id },
+        include: User,
+      });
+
+      res.render("profiles/edit", {
+        data,
+        title: `Edit ${username}'s Profile`,
+      });
+    } catch (error) {
+      res.send(error);
+    }
+  }
+
+  static async postProfileEdit(req, res) {
+    try {
+      const { username } = req.params;
+      const { username: newUsername, firstName, lastName, address } = req.body;
+
+      if (req.session.username !== username && req.session.role !== "admin") {
+        return res.redirect("/products");
+      }
+
+      const user = await User.findOne({ where: { username } });
+      if (!user) return res.status(404).send("User not found");
+
+      await Profile.findOrCreate({
+        where: { userId: user.id },
+        defaults: {
+          firstName: "",
+          lastName: "",
+          address: "",
+        },
+      });
+
+      await User.update({ username: newUsername }, { where: { id: user.id } });
+      await Profile.update(
+        { firstName, lastName, address },
+        { where: { userId: user.id } },
+      );
+
+      if (req.session.userId === user.id) {
+        req.session.username = newUsername;
+      }
+
+      return res.redirect(`/profiles/${newUsername}`);
+    } catch (error) {
+      res.send(error);
+    }
+  }
+
   //---------
   // Delete
   //---------
