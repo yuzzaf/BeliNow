@@ -9,7 +9,6 @@ const {
 } = require("../models");
 const { Op } = require("sequelize");
 const { formatRupiah } = require("../helpers/formatRupiah");
-const user = require("../models/user");
 
 class Controller {
   //---------
