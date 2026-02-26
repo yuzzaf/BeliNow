@@ -60,10 +60,9 @@
                   Edit
                 </a>
 
-                <a href="/products/<%= product.id %>/delete" 
-                   class="btn btn-sm btn-outline-danger">
-                  Delete
-                </a>
+                <form method="POST" action="/products/<%= product.id %>/delete" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
 
               </div>
 

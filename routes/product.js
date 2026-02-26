@@ -5,7 +5,6 @@ const { isLoggedIn } = require("../middlewares/middleware");
 
 // Public
 router.get("/", Controller.productList);
-router.get("/:id", Controller.productDetail);
 
 // Protected
 router.use(isLoggedIn);
@@ -15,4 +14,6 @@ router.get("/:id/edit", Controller.getEditProduct);
 router.post("/:id/edit", Controller.postEditProduct);
 router.post("/:id/delete", Controller.deleteProduct);
 
+// Public
+router.get("/:id", Controller.productDetail);
 module.exports = router;
