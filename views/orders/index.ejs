@@ -1,0 +1,170 @@
+  <style>
+    body {
+      background-color: #f8f9fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar-custom {
+      background-color: black;
+    }
+
+    .navbar-custom .navbar-brand,
+    .navbar-custom .nav-link {
+      color: white;
+    }
+
+    .main-container {
+      flex: 1;
+      padding: 40px 20px;
+    }
+
+    .cart-card {
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .product-img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+    }
+
+    footer {
+      background-color: black;
+      color: white;
+      text-align: center;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-custom">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/products">BeliNow</a>
+
+    <div class="ms-auto">
+      <a class="nav-link d-inline" href="/products">Products</a>
+      <a class="nav-link d-inline" href="/cart">Cart</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- Main -->
+<div class="main-container container">
+
+  <h3 class="mb-4">Shopping Cart</h3>
+
+  <div class="card cart-card">
+    <div class="card-body">
+
+      <% if (dataProduct.length === 0) { %>
+
+        <p class="text-center">Your cart is empty</p>
+
+      <% } else { %>
+
+        <table class="table align-middle">
+
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Qty</th>
+              <th>Subtotal</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <% let total = 0 %>
+
+            <% dataProduct.forEach(item => { 
+                 const subtotal = item.price * item.quantity
+                 total += subtotal
+            %>
+
+            <tr>
+
+              <td>
+                <img src="<%= item.imageUrl %>" class="product-img">
+              </td>
+
+              <td>
+                <%= item.name %>
+              </td>
+
+              <td>
+                Rp <%= item.price.toLocaleString('id-ID') %>
+              </td>
+
+              <td>
+                <%= item.quantity %>
+              </td>
+
+              <td>
+                Rp <%= subtotal.toLocaleString('id-ID') %>
+              </td>
+
+              <td>
+
+                <form action="/cart/<%= item.id %>/delete" method="POST">
+                  <button class="btn btn-sm btn-danger">
+                    Remove
+                  </button>
+                </form>
+
+              </td>
+
+            </tr>
+
+            <% }) %>
+
+          </tbody>
+
+        </table>
+
+
+        <!-- Total -->
+        <div class="d-flex justify-content-end mt-3">
+
+          <div class="text-end">
+
+            <h5>
+              Total: 
+              <strong>
+                Rp <%= total.toLocaleString('id-ID') %>
+              </strong>
+            </h5>
+
+            <form action="/checkout" method="POST">
+              <button class="btn btn-dark mt-2">
+                Checkout
+              </button>
+            </form>
+
+          </div>
+
+        </div>
+
+      <% } %>
+
+    </div>
+  </div>
+
+</div>
+
+
+<!-- Footer -->
+<footer>
+  © 2026 BeliNow
+</footer>
+
+</body>
+</html>

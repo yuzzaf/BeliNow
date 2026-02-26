@@ -4,7 +4,7 @@ const Controller = require("../controllers/controller");
 
 router.get("/", Controller.orderList);
 
-router.post("/create", Controller.createOrder);
+router.get("/create/:productId", Controller.createOrder);
 
 router.get("/:id", Controller.orderDetail);
 
