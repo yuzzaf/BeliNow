@@ -18,6 +18,10 @@ class Controller {
   static async productList(req, res) {
     try {
       let { search } = req.query;
+      let notifDeleteProduct = req.query.message
+
+      let data = await Product.findAll({
+        include: Category,
 
       let option = {
         include: Category,
@@ -33,11 +37,7 @@ class Controller {
       }
       let data = await Product.findAll(option);
 
-      res.render("products/index", {
-        data,
-        title: "All Products",
-        formatRupiah,
-        search,
+      res.render("products/index", {data, notifDeleteProduct, title: "All Products", formatRupiah, search
       });
     } catch (error) {
       res.send(error);
@@ -72,14 +72,18 @@ class Controller {
   }
   static async postAddProduct(req, res) {
     try {
-      await Product.create({ 
-                name: req.body.name,
-                price: req.body.price,
-                imageUrl: req.body.imageUrl,
-                description: req.body.description,
-                categoryId: req.body.categoryId,
-                stock: req.body.stock 
-            });
+      const { name, price, imageUrl, description, categoryId, stock } = req.body;
+      const product = await Product.create({
+        name,
+        price,
+        imageUrl,
+        description,
+        stock
+      });
+    await ProductCategory.create({
+      productId: product.id,
+      categoryId: categoryId
+    });
       res.redirect('/products')
     } catch (error) {
       res.send(error);
@@ -97,18 +101,40 @@ class Controller {
   }
   static async postEditProduct(req, res) {
     try {
+      const productId = req.params.id;
+      const { title, storeName, price, stock, imageURL, categoryId } = req.body;
       await Product.update({
-            title: req.body.title,
-            storeName: req.body.storeName,
-            price: req.body.price,
-            stock: req.body.stock,
-            imageURL: req.body.imageURL
-      },{
-        where: {id: req.params.id}
-    })
+      title,
+      storeName,
+      price,
+      stock,
+      imageURL
+    }, {
+      where: { id: productId }
+    });
+
+    await ProductCategory.destroy({
+      where: { productId }
+    });
+
+    await ProductCategory.create({
+      productId,
+      categoryId
+    });
+    
     res.redirect('/products') 
     } catch (error) {
       res.send(error);
+    }
+  }
+  static async deleteProduct(req,res){
+    try {
+            let findProduct = await Product.findByPk(req.params.id)
+            let productName = findProduct.name
+            await findProduct.destroy()
+            res.redirect(`/products/?message=${productName} removed!`)
+    } catch (error) {
+      res.send(error)
     }
   }
   //---------
@@ -120,11 +146,13 @@ class Controller {
   //---------
   static async categoryList(req, res) {
     try {
-       const categories = await Category.findAll({
-        order: [["id", "ASC"]]
-      });
+      let notifDeleteCategory = req.query.message
 
-      res.render("categories/index", {categories, title:"category-list"});
+      const categories = await Category.findAll({
+      order: [["id", "ASC"]]
+    });
+
+      res.render("categories/index", {categories, notifDeleteCategory, title:"category-list"});
     } catch (error) {
       res.send(error);
     }
@@ -148,7 +176,16 @@ class Controller {
       res.send(error);
     }
   }
-
+  static async deleteCategory(req,res){
+    try {
+            let findCategory = await Category.findByPk(req.params.id)
+            let categoryName = findCategory.name
+            await findCategory.destroy()
+            res.redirect(`/categories/?message=${categoryName} removed!`)
+    } catch (error) {
+      res.send(error)
+    }
+  }
   //---------
   // Category
   //---------
@@ -433,17 +470,6 @@ const order = await Order.findOne({
   // Delete
   //---------
 
-  static async deleteProduct(req, res) {
-    try {
-      const {id} = req.params
-      await Product.destroy({
-              where: {id},
-            })
-            res.redirect('/products')
-    } catch (error) {
-      res.send(error);
-    }
-  }
 }
 
 module.exports = Controller;

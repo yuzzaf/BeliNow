@@ -13,6 +13,27 @@
       <button class="btn btn-dark">Search</button>
     </div>
   </form>
+
+<% if (notifDeleteProduct) { %>
+  <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center justify-content-between mb-4"
+       role="alert"
+       style="border-radius: 10px;">
+
+    <div class="d-flex align-items-center gap-2">
+      <span style="font-size: 20px;">🗑️</span>
+      <div>
+        <strong>Product Deleted!</strong><br>
+        <small class="text-muted">
+          "<%= notifDeleteProduct %>"
+        </small>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+
+  <a href="/orders">Shopping Cart</a>
+
   <% if (!data || data.length === 0) { %>
 
     <div class="alert alert-warning text-center">
@@ -60,10 +81,9 @@
                   Edit
                 </a>
 
-                <a href="/products/<%= product.id %>/delete" 
-                   class="btn btn-sm btn-outline-danger">
-                  Delete
-                </a>
+                <form method="POST" action="/products/<%= product.id %>/delete" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
 
               </div>
 
