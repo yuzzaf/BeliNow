@@ -1,0 +1,92 @@
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1">Order Detail - <%= user ? user.username : "-" %></h2>
+      <p class="text-muted mb-0">
+        Date:
+        <%= order.orderDate ? new Date(order.orderDate).toLocaleString("id-ID") : "-" %>
+      </p>
+    </div>
+    <a href="/orders" class="btn btn-outline-dark btn-sm">Back to Orders</a>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <p class="mb-1"><strong>Order Address</strong></p>
+          <p class="mb-0 text-muted"><%= profile?.address || "-" %></p>
+        </div>
+        <div class="col-md-3">
+          <p class="mb-1"><strong>Total Items</strong></p>
+          <p class="mb-0 text-muted">
+            <%= order.OrderDetails ? order.OrderDetails.length : 0 %> item(s)
+          </p>
+        </div>
+        <div class="col-md-3">
+          <p class="mb-1"><strong>Status</strong></p>
+          <% const currentStatus = order.OrderDetails?.[0]?.status || "-" %>
+            <span class="badge text-bg-secondary"><%= currentStatus %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if (!order || !order.OrderDetails || order.OrderDetails.length === 0) { %>
+    <div class="alert alert-warning text-center">
+      No items in this order
+    </div>
+  <% } else { %>
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th class="text-end">Price</th>
+              <th class="text-center">Qty</th>
+              <th class="text-end">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% let total = 0; %>
+            <% order.OrderDetails.forEach(item => { %>
+              <% const subtotal = item.price * item.quantity; total += subtotal; %>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-3">
+                    <img
+                      src="<%= item.Product?.imageUrl %>"
+                      alt="<%= item.Product?.name %>"
+                      style="width:60px;height:60px;object-fit:cover;border-radius:8px;"
+                    />
+                    <div>
+                      <strong><%= item.Product?.name || "-" %></strong>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-end"><%= formatRupiah(item.price) %></td>
+                <td class="text-center"><%= item.quantity %></td>
+                <td class="text-end"><%= formatRupiah(subtotal) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+
+        <hr class="my-4" />
+
+        <div class="d-flex justify-content-end">
+          <div class="text-end">
+            <p class="mb-1 text-muted">Total</p>
+            <h4 class="mb-0"><%= formatRupiah(total) %></h4>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+        <form method="POST" action="/orders/<%= order.id %>/checkout">
+            <button class="btn btn-dark">Checkout</button>
+        </form>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</div>

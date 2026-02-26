@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "productId",
         otherKey: "categoryId",
       });
+      Product.hasMany(models.OrderDetail, { foreignKey: "productId" });
     }
   }
   Product.init(
@@ -22,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       imageUrl: DataTypes.STRING,
       description: DataTypes.TEXT,
       categoryId: DataTypes.INTEGER,
-      stock: DataTypes.INTEGER
+      stock: DataTypes.INTEGER,
     },
     {
       sequelize,

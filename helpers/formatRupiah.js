@@ -1,9 +1,9 @@
-function formatRupiah(number) {
+function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(number);
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0));
 }
 
 module.exports = { formatRupiah };

@@ -1,0 +1,55 @@
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Order History</h2>
+    <% if (user && user.role === "admin") { %>
+      <a href="/products" class="btn btn-outline-dark btn-sm">Back to Products</a>
+    <% } else { %>
+      <a href="/orders" class="btn btn-outline-dark btn-sm">Back to Cart</a>
+    <% } %>
+  </div>
+
+  <% if (!orders || orders.length === 0) { %>
+    <div class="alert alert-warning text-center">No paid orders yet.</div>
+  <% } else { %>
+    <% orders.forEach(order => { %>
+      <div class="card mb-3 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Order #<%= order.id %></h5>
+            <% const status = order.OrderDetails?.[0]?.status || "-" %>
+            <span class="badge <%= status === "paid" ? "text-bg-success" : "text-bg-secondary" %>">
+              <%= status %>
+            </span>
+          </div>
+
+          <p class="mb-1 text-muted">
+            Date: <%= order.orderDate ? new Date(order.orderDate).toLocaleString("id-ID") : "-" %>
+          </p>
+          <p class="mb-1 text-muted">
+            Username: <%= order.User?.username || "-" %>
+          </p>
+          <p class="mb-3 text-muted">
+            Address: <%= order.orderAddress || "-" %>
+          </p>
+
+          <% let total = 0; %>
+          <ul class="list-group mb-3">
+            <% order.OrderDetails.forEach(item => { %>
+              <% const subtotal = item.price * item.quantity; total += subtotal; %>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                  <%= item.Product?.name || "-" %> x <%= item.quantity %>
+                </span>
+                <strong><%= formatRupiah(subtotal) %></strong>
+              </li>
+            <% }) %>
+          </ul>
+
+          <div class="text-end">
+            Total: <strong><%= formatRupiah(total) %></strong>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  <% } %>
+</div>

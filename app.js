@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
 const session = require("express-session");
+const { Order, OrderDetail } = require("./models");
 const routes = require("./routes");
 
 const app = express();
@@ -34,7 +35,38 @@ app.use((req, res, next) => {
         username: req.session.username,
       }
     : null;
+  res.locals.cartCount = 0;
   next();
+});
+
+app.use(async (req, res, next) => {
+  try {
+    if (!req.session.userId || req.session.role === "admin") {
+      return next();
+    }
+
+    const activeCartOrder = await Order.findOne({
+      where: { userId: req.session.userId },
+      include: [
+        {
+          model: OrderDetail,
+          where: { status: "cart" },
+          required: true,
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.locals.cartCount =
+      activeCartOrder?.OrderDetails?.reduce(
+        (sum, item) => sum + (item.quantity || 0),
+        0,
+      ) || 0;
+
+    next();
+  } catch (error) {
+    return next(error);
+  }
 });
 
 // View engine

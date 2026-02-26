@@ -3,6 +3,7 @@ const { Model } = require("sequelize");
 const bcrypt = require("bcrypt");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
+    // Static auth helper for login flow in controller.
     static async login({ email, password }) {
       if (!email || !password) {
         throw new Error("Email and password are required");
@@ -26,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasOne(models.Profile, {
         foreignKey: "userId",
       });
-      User.hasMany(models.Order);
+      User.hasMany(models.Order, { foreignKey: "userId" });
     }
   }
   User.init(
@@ -82,6 +83,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       hooks: {
+        // Hash plain password before persisting user record.
         beforeCreate(User, options) {
           const hashed = bcrypt.hashSync(User.password, 10);
           User.password = hashed;
