@@ -9,7 +9,6 @@ const {
 } = require("../models");
 const { Op } = require("sequelize");
 const { formatRupiah } = require("../helpers/formatRupiah");
-const product = require("../models/product");
 
 class Controller {
   //---------
@@ -17,13 +16,9 @@ class Controller {
   //---------
   static async productList(req, res) {
     try {
-      let { search } = req.query;
-      let notifDeleteProduct = req.query.message
+      const { search, message: notifDeleteProduct } = req.query;
 
-      let data = await Product.findAll({
-        include: Category,
-
-      let option = {
+      const option = {
         include: Category,
         order: [["createdAt", "DESC"]],
       };
@@ -35,21 +30,29 @@ class Controller {
           },
         };
       }
-      let data = await Product.findAll(option);
 
-      res.render("products/index", {data, notifDeleteProduct, title: "All Products", formatRupiah, search
+      const data = await Product.findAll(option);
+
+      res.render("products/index", {
+        data,
+        notifDeleteProduct,
+        title: "All Products",
+        formatRupiah,
+        search,
       });
     } catch (error) {
       res.send(error);
     }
   }
+
   static async productDetail(req, res) {
     try {
       const { id } = req.params;
+      const data = await Product.findByPk(id, { include: Category });
 
-      const data = await Product.findByPk(id, {
-        include: Category,
-      });
+      if (!data) {
+        return res.status(404).send("Product not found");
+      }
 
       res.render("products/detail", {
         data,
@@ -61,80 +64,116 @@ class Controller {
       res.redirect("/products?error=" + encodeURIComponent(error.message));
     }
   }
+
   static async getAddProduct(req, res) {
     try {
-      let dataProduct = await Product.findAll()
-      let categories = await Category.findAll()
-      res.render("products/add", {dataProduct, categories, title:"Add Product"})
+      const categories = await Category.findAll();
+      res.render("products/add", {
+        categories,
+        title: "Add Product",
+      });
     } catch (error) {
       res.send(error);
     }
   }
+
   static async postAddProduct(req, res) {
     try {
-      const { name, price, imageUrl, description, categoryId, stock } = req.body;
-      const product = await Product.create({
+      const { name, price, imageUrl, description, categoryId, stock } =
+        req.body;
+
+      const newProduct = await Product.create({
         name,
         price,
         imageUrl,
         description,
-        stock
+        stock,
       });
-    await ProductCategory.create({
-      productId: product.id,
-      categoryId: categoryId
-    });
-      res.redirect('/products')
+
+      if (categoryId) {
+        await ProductCategory.create({
+          productId: newProduct.id,
+          categoryId: +categoryId,
+        });
+      }
+
+      res.redirect("/products");
     } catch (error) {
       res.send(error);
     }
   }
+
   static async getEditProduct(req, res) {
     try {
-      let {id} = req.params
-      let product = await Product.findByPk(id) 
-      let categories = await Category.findAll()      
-      res.render('products/edit', {product, categories, title:"edit product"} )
+      const { id } = req.params;
+      const product = await Product.findByPk(id, { include: Category });
+      const categories = await Category.findAll();
+
+      if (!product) {
+        return res.status(404).send("Product not found");
+      }
+
+      res.render("products/edit", {
+        product,
+        categories,
+        title: "Edit Product",
+      });
     } catch (error) {
       res.send(error);
     }
   }
+
   static async postEditProduct(req, res) {
     try {
-      const productId = req.params.id;
-      const { title, storeName, price, stock, imageURL, categoryId } = req.body;
-      await Product.update({
-      title,
-      storeName,
-      price,
-      stock,
-      imageURL
-    }, {
-      where: { id: productId }
-    });
+      const productId = +req.params.id;
+      const { name, price, imageUrl, description, stock, categoryId } =
+        req.body;
 
-    await ProductCategory.destroy({
-      where: { productId }
-    });
+      await Product.update(
+        {
+          name,
+          price,
+          imageUrl,
+          description,
+          stock,
+        },
+        {
+          where: { id: productId },
+        },
+      );
 
-    await ProductCategory.create({
-      productId,
-      categoryId
-    });
-    
-    res.redirect('/products') 
+      await ProductCategory.destroy({ where: { productId } });
+
+      if (categoryId) {
+        await ProductCategory.create({
+          productId,
+          categoryId: +categoryId,
+        });
+      }
+
+      res.redirect("/products");
     } catch (error) {
       res.send(error);
     }
   }
-  static async deleteProduct(req,res){
+
+  static async deleteProduct(req, res) {
     try {
-            let findProduct = await Product.findByPk(req.params.id)
-            let productName = findProduct.name
-            await findProduct.destroy()
-            res.redirect(`/products/?message=${productName} removed!`)
+      const { id } = req.params;
+      const findProduct = await Product.findByPk(id);
+
+      if (!findProduct) {
+        return res.redirect("/products?message=Product not found");
+      }
+
+      const productName = findProduct.name;
+      await findProduct.destroy();
+
+      res.redirect(
+        `/products?message=${encodeURIComponent(productName + " removed!")}`,
+      );
     } catch (error) {
-      res.send(error)
+      res.send(error);
     }
   }
   //---------
@@ -146,44 +185,56 @@ class Controller {
   //---------
   static async categoryList(req, res) {
     try {
-      let notifDeleteCategory = req.query.message
+      const notifDeleteCategory = req.query.message;
 
       const categories = await Category.findAll({
-      order: [["id", "ASC"]]
-    });
+        order: [["id", "ASC"]],
+      });
 
-      res.render("categories/index", {categories, notifDeleteCategory, title:"category-list"});
+      res.render("categories/index", {
+        categories,
+        notifDeleteCategory,
+        title: "category-list",
+      });
     } catch (error) {
       res.send(error);
     }
   }
+
   static async getAddCategory(req, res) {
     try {
-      res.render("categories/add", {title:"add-category"});
+      res.render("categories/add", { title: "add-category" });
     } catch (error) {
       res.send(error);
     }
   }
+
   static async postAddCategory(req, res) {
     try {
       const { name } = req.body;
-      await Category.create({
-        name: req.body.name
-      });
-
+      await Category.create({ name });
       res.redirect("/categories");
     } catch (error) {
       res.send(error);
     }
   }
-  static async deleteCategory(req,res){
+
+  static async deleteCategory(req, res) {
     try {
-            let findCategory = await Category.findByPk(req.params.id)
-            let categoryName = findCategory.name
-            await findCategory.destroy()
-            res.redirect(`/categories/?message=${categoryName} removed!`)
+      const findCategory = await Category.findByPk(req.params.id);
+
+      if (!findCategory) {
+        return res.redirect("/categories?message=Category not found");
+      }
+
+      const categoryName = findCategory.name;
+      await findCategory.destroy();
+
+      res.redirect(
+        `/categories?message=${encodeURIComponent(categoryName + " removed!")}`,
+      );
     } catch (error) {
-      res.send(error)
+      res.send(error);
     }
   }
   //---------
@@ -195,80 +246,93 @@ class Controller {
   //---------
   static async orderList(req, res) {
     try {
-      const userId = 1 // nanti ganti req.session.userId
+      const userId = req.session.userId;
 
-const order = await Order.findOne({
-  where: { userId },
-  include: [
-    {
-      model: OrderDetail,
-      include: [
-        {
-          model: Product
-        }
-      ]
-    }
-  ]
-})
-      res.render('orders/index', {order, title: "Shopping Cart"})
+      const order = await Order.findOne({
+        where: { userId },
+        include: [
+          {
+            model: OrderDetail,
+            include: [Product],
+          },
+        ],
+      });
+
+      res.render("orders/index", { order, title: "Shopping Cart" });
     } catch (error) {
       res.send(error);
     }
   }
+
   static async orderDetail(req, res) {
     try {
+      const { id } = req.params;
+
+      const order = await Order.findByPk(id, {
+        include: [
+          {
+            model: OrderDetail,
+            include: [Product],
+          },
+        ],
+      });
+
+      if (!order) {
+        return res.status(404).send("Order not found");
+      }
+
+      res.render("orders/detail", {
+        order,
+        title: "Order Detail",
+      });
     } catch (error) {
       res.send(error);
     }
   }
+
   static async createOrder(req, res) {
     try {
-      const userId = 1 // nanti ganti req.session.userId
-    const productId = +req.params.productId
+      const userId = req.session.userId;
+      const productId = +req.params.productId;
 
-    let order = await Order.findOne({
-      where: { userId }
-    })
-    // kalau belum ada → buat order baru
-    if (!order) {
-      order = await Order.create({
-        userId,
-        orderDate: new Date(),
-        orderAddress: ""
-      })
-    }
-
-    // cek apakah product sudah ada di cart
-    let orderDetail = await OrderDetail.findOne({
-      where: {
-        ordersId: order.id, // FIXED (bukan ordersId)
-        productId
+      const product = await Product.findByPk(productId);
+      if (!product) {
+        return res.redirect("/products?error=Product not found");
       }
-    })
 
-    if (orderDetail) {
+      let order = await Order.findOne({ where: { userId } });
+      if (!order) {
+        order = await Order.create({
+          userId,
+          orderDate: new Date(),
+          orderAddress: "",
+        });
+      }
 
-      // tambah quantity +1
-      await orderDetail.increment("quantity")
+      const orderDetail = await OrderDetail.findOne({
+        where: {
+          ordersId: order.id,
+          productId,
+        },
+      });
 
-    } else {
-         const product = await Product.findByPk(productId)
-      await OrderDetail.create({
-        ordersId: order.id, // FIXED
-        productId,
-        price: product.price,
-        quantity: 1,
-        status: "cart"
-      })
+      if (orderDetail) {
+        await orderDetail.increment("quantity");
+      } else {
+        await OrderDetail.create({
+          ordersId: order.id,
+          productId,
+          price: product.price,
+          quantity: 1,
+          status: "cart",
+        });
+      }
 
-    }
-
-    res.redirect("/orders")
+      res.redirect("/orders");
     } catch (error) {
       res.send(error);
     }
   }
-
   //---------
   // Order
   //---------
@@ -276,32 +340,29 @@ const order = await Order.findOne({
   //---------
   // Login, Register, Logout
   //---------
-
   static async getLogin(req, res) {
     try {
       res.render("auth/login", { title: "Login" });
     } catch (error) {
-      console.log(error);
       res.send(error);
     }
   }
+
   static async postLogin(req, res) {
     try {
       const { email, password } = req.body;
+      const user = await User.login({ email, password });
 
-      User.login({ email, password }).then((user) => {
-        if (!user) {
-          throw new Error("Invalid email or password");
-        }
-        req.session.userId = user.id;
-        req.session.role = user.role;
-        req.session.username = user.username;
-        return res.redirect("/products");
-      });
+      req.session.userId = user.id;
+      req.session.role = user.role;
+      req.session.username = user.username;
+
+      return res.redirect("/products");
     } catch (error) {
-      return res.redirect("/login?error=" + error.message);
+      return res.redirect("/login?error=" + encodeURIComponent(error.message));
     }
   }
+
   static async getRegister(req, res) {
     try {
       res.render("auth/register", { title: "Register" });
@@ -309,6 +370,7 @@ const order = await Order.findOne({
       res.send(error);
     }
   }
+
   static async postRegister(req, res) {
     try {
       const { username, email, password, role } = req.body;
@@ -322,35 +384,33 @@ const order = await Order.findOne({
 
       await Profile.create({
         userId: newUser.id,
-        username: username,
         firstName: "",
         lastName: "",
         address: "",
       });
 
-      // redirect ke login setelah sukses
       res.redirect("/login");
     } catch (error) {
       if (error.name === "SequelizeValidationError") {
         const errors = error.errors.map((el) => el.message);
-        return res.redirect("/register?error=" + errors.join(", "));
+        return res.redirect(
+          "/register?error=" + encodeURIComponent(errors.join(", ")),
+        );
       }
       res.send(error);
     }
   }
+
   static async logout(req, res) {
-    //logout
     try {
       req.session.destroy(() => {
-        res.redirect("/products");
+        res.clearCookie("connect.sid");
+        res.redirect("/login");
       });
-      res.clearCookie("connect.sid"); // hapus cookie
-      res.redirect("/login");
     } catch (error) {
       res.send(error);
     }
   }
-
   //---------
   // Login, Register, Logout
   //---------
@@ -358,7 +418,6 @@ const order = await Order.findOne({
   //---------
   // Profiles
   //---------
-
   static async getProfile(req, res) {
     try {
       const { username } = req.params;
@@ -366,20 +425,18 @@ const order = await Order.findOne({
       const user = await User.findOne({ where: { username } });
       if (!user) return res.status(404).send("User not found");
 
+      if (req.session.username !== username && req.session.role !== "admin") {
+        return res.redirect("/products");
+      }
+
       await Profile.findOrCreate({
         where: { userId: user.id },
         defaults: {
-          username: user.username,
           firstName: "",
           lastName: "",
           address: "",
         },
       });
-
-      // cek authorization
-      if (req.session.username !== username && req.session.role !== "admin") {
-        return res.redirect("/products");
-      }
 
       const data = await Profile.findOne({
         where: { userId: user.id },
@@ -462,14 +519,18 @@ const order = await Order.findOne({
 
       return res.redirect(`/profiles/${newUsername}`);
     } catch (error) {
+      if (error.name === "SequelizeValidationError") {
+        const errors = error.errors.map((el) => el.message);
+        return res.redirect(
+          `/profiles/${req.params.username}/edit?error=${encodeURIComponent(errors.join(", "))}`,
+        );
+      }
       res.send(error);
     }
   }
-
   //---------
-  // Delete
+  // Profiles
   //---------
-
 }
 
 module.exports = Controller;
