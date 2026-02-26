@@ -1,0 +1,105 @@
+  <!-- Main Content -->
+  <div class="main-container">
+
+    <div class="card card-custom">
+      <div class="card-body">
+
+        <h3 class="text-center mb-4">Add New Product</h3>
+
+        <form action="/products/add" method="POST">
+
+          <!-- Name -->
+          <div class="mb-3">
+            <label class="form-label">Product Name</label>
+            <input
+              type="text"
+              name="name"
+              class="form-control"
+              required
+            >
+          </div>
+
+          <!-- Price -->
+          <div class="mb-3">
+            <label class="form-label">Price</label>
+            <input
+              type="number"
+              name="price"
+              class="form-control"
+              required
+            >
+          </div>
+
+          <!-- Image URL -->
+          <div class="mb-3">
+            <label class="form-label">Image URL</label>
+            <input
+              type="text"
+              name="imageUrl"
+              class="form-control"
+              required
+            >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <input
+              type="text"
+              name="description"
+              class="form-control"
+              required
+            >
+          </div>
+
+          <!-- Category -->
+          <div class="mb-3">
+            <label class="form-label">Category</label>
+            <select name="categoryId" class="form-select" required>
+              <% categories.forEach(el => { %>
+                <option value="<%= el.id %>">
+                  <%= el.name %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Stock</label>
+            <input
+              type="number"
+              name="stock"
+              class="form-control"
+              required
+            >
+          </div>
+
+          <!-- Buttons -->
+          <div class="d-flex justify-content-between">
+
+            <a href="/products" class="btn btn-secondary">
+              Cancel
+            </a>
+
+            <button type="submit" class="btn btn-dark">
+              Add Product
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- Footer -->
+  <footer>
+    © 2026 BeliNow. All rights reserved.
+  </footer>
+
+</body>
+</html>
+
+

@@ -1,0 +1,68 @@
+<nav style="background: #111; padding: 15px 0; color: white">
+  <div class="container-fluid px-4" style="display: flex; justify-content: space-between; align-items: center">
+    <a href="/products" style="color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 2rem; font-weight: 700; line-height: 1;">
+      <i class="bi bi-bag-fill"></i>
+      <span>BeliNow</span>
+    </a>
+
+    <div style="display: flex; gap: 18px; align-items: center">
+      <a href="/products" title="Products" style="color: white; text-decoration: none;">
+        <i class="bi bi-grid"></i>
+      </a>
+
+      <% if (user) { %>
+        <% if (user.role === "admin") { %>
+          <a href="/categories/add" title="Add Category" style="color: white; text-decoration: none;">
+            <i class="bi bi-tags"></i>
+          </a>
+        <% } %>
+
+        <% if (user.role !== "admin") { %>
+          <a href="/orders" title="Cart" style="color: white; text-decoration: none; position: relative; display: inline-flex; align-items: center;">
+            <i class="bi bi-cart3"></i>
+            <% if (cartCount && cartCount > 0) { %>
+              <span
+                style="
+                  position: absolute;
+                  top: -8px;
+                  right: -10px;
+                  min-width: 16px;
+                  height: 16px;
+                  border-radius: 999px;
+                  background: #dc3545;
+                  color: white;
+                  font-size: 10px;
+                  line-height: 16px;
+                  text-align: center;
+                  padding: 0 4px;
+                "
+              >
+                <%= cartCount %>
+              </span>
+            <% } %>
+          </a>
+        <% } %>
+
+        <a href="/orders/history" title="History" style="color: white; text-decoration: none;">
+          <i class="bi bi-clock-history"></i>
+        </a>
+
+        <a href="/profiles/<%= user.username %>" title="Profile" style="color: #ddd; text-decoration: none; display:flex; align-items:center; gap:6px;">
+          <i class="bi bi-person-circle"></i>
+          <span><%= user.username %></span>
+        </a>
+
+        <a href="/logout" title="Logout" style="color: #ff6b6b; text-decoration: none;">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      <% } else { %>
+        <a href="/login" title="Login" style="color: white; text-decoration: none;">
+          <i class="bi bi-box-arrow-in-right"></i>
+        </a>
+        <a href="/register" title="Register" style="color: white; text-decoration: none;">
+          <i class="bi bi-person-plus"></i>
+        </a>
+      <% } %>
+    </div>
+  </div>
+</nav>

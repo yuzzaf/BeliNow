@@ -1,0 +1,103 @@
+
+<body class="bg-light">
+
+<!-- Main Container -->
+<div class="container py-5">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    
+    <div>
+      <h2 class="mb-0">Category List</h2>
+      <small class="text-muted">Manage your product categories</small>
+    </div>
+
+    <a href="/categories/add" class="btn btn-primary">
+      + Add Category
+    </a>
+
+  </div>
+
+  <% if (notifDeleteCategory) { %>
+  <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center justify-content-between mb-4"
+       role="alert"
+       style="border-radius: 10px;">
+
+    <div class="d-flex align-items-center gap-2">
+      <span style="font-size: 20px;">🗑️</span>
+      <div>
+        <strong>Category Deleted!</strong><br>
+        <small class="text-muted">
+          "<%= notifDeleteCategory %>"
+        </small>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+  <!-- Card -->
+  <div class="card shadow-sm border-0">
+
+    <div class="card-body">
+
+      <% if (!categories || categories.length === 0) { %>
+
+        <div class="alert alert-info text-center mb-0">
+          No categories found.
+        </div>
+
+      <% } else { %>
+
+        <div class="table-responsive">
+
+          <table class="table table-hover align-middle mb-0">
+
+            <thead class="table-dark">
+              <tr>
+                <th style="width: 10%;">ID</th>
+                <th>Category Name</th>
+                <th class="text-end" style="width: 15%;">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <% categories.forEach(category => { %>
+
+                <tr>
+
+                  <td class="fw-semibold text-muted">
+                    #<%= category.id %>
+                  </td>
+
+                  <td class="fw-semibold">
+                    <%= category.name %>
+                  </td>
+                  <td class="text-end">
+                    <a href="/categories/<%= category.id %>/delete" 
+                      class="btn btn-sm btn-outline-danger">
+                      🗑 Delete
+                    </a>
+                  </td>
+
+                </tr>
+
+              <% }) %>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      <% } %>
+
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
+
