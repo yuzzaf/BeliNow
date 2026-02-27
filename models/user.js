@@ -5,17 +5,21 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     // Static auth helper for login flow in controller.
     static async login({ email, password }) {
-      if (!email || !password) {
+      const normalizedEmail =
+        typeof email === "string" ? email.trim().toLowerCase() : "";
+      const rawPassword = typeof password === "string" ? password : "";
+
+      if (!normalizedEmail || !rawPassword.trim()) {
         throw new Error("Email and password are required");
       }
 
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({ where: { email: normalizedEmail } });
 
       if (!user) {
         throw new Error("Invalid email/password");
       }
 
-      const isValid = bcrypt.compareSync(password, user.password);
+      const isValid = bcrypt.compareSync(rawPassword, user.password);
 
       if (!isValid) {
         throw new Error("Invalid email/password");
@@ -47,12 +51,23 @@ module.exports = (sequelize, DataTypes) => {
       email: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: {
+          msg: "Email already registered",
+        },
+        set(value) {
+          const normalizedEmail =
+            typeof value === "string" ? value.trim().toLowerCase() : value;
+          this.setDataValue("email", normalizedEmail);
+        },
         validate: {
           notEmpty: {
             msg: "Email is required",
           },
           notNull: {
             msg: "Email is required",
+          },
+          isEmail: {
+            msg: "Email format is invalid",
           },
         },
       },
@@ -66,6 +81,10 @@ module.exports = (sequelize, DataTypes) => {
           notNull: {
             msg: "Password is required",
           },
+          len: {
+            args: [8, 255],
+            msg: "Password must be at least 8 characters",
+          },
         },
       },
       role: {
@@ -77,6 +96,10 @@ module.exports = (sequelize, DataTypes) => {
           },
           notNull: {
             msg: "Role is required",
+          },
+          isIn: {
+            args: [["buyer", "admin"]],
+            msg: "Role is invalid",
           },
         },
       },

@@ -618,7 +618,12 @@ class Controller {
   //---------
   static async getLogin(req, res) {
     try {
-      res.render("auth/login", { title: "Login" });
+      const error = req.query.error ? decodeURIComponent(req.query.error) : "";
+      const formData = {
+        email: req.query.email || "",
+      };
+
+      res.render("auth/login", { title: "Login", error, formData });
     } catch (error) {
       res.send(error);
     }
@@ -635,7 +640,12 @@ class Controller {
 
       return res.redirect("/products");
     } catch (error) {
-      return res.redirect("/login?error=" + encodeURIComponent(error.message));
+      const { email } = req.body;
+      return res.redirect(
+        "/login?error=" +
+          encodeURIComponent(error.message) +
+          `&email=${encodeURIComponent(email || "")}`,
+      );
     }
   }
 
@@ -662,10 +672,44 @@ class Controller {
   static async postRegister(req, res) {
     try {
       const { username, email, password, role } = req.body;
+      const errors = [];
+      const normalizedEmail = (email || "").trim().toLowerCase();
+
+      if (!username || !username.trim()) errors.push("Username is required");
+      if (!normalizedEmail) errors.push("Email is required");
+      if (normalizedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+        errors.push("Email format is invalid");
+      }
+      if (!password || !password.trim()) {
+        errors.push("Password is required");
+      } else if (password.length < 8) {
+        errors.push("Password must be at least 8 characters");
+      }
+      if (!role || !role.trim()) errors.push("Role is required");
+      if (role && !["buyer", "admin"].includes(role)) {
+        errors.push("Role is invalid");
+      }
+
+      if (normalizedEmail) {
+        const existingUser = await User.findOne({ where: { email: normalizedEmail } });
+        if (existingUser) {
+          errors.push("Email already registered");
+        }
+      }
+
+      if (errors.length) {
+        return res.redirect(
+          "/register?error=" +
+            encodeURIComponent(errors.join("|")) +
+            `&username=${encodeURIComponent(username || "")}` +
+            `&email=${encodeURIComponent(email || "")}` +
+            `&role=${encodeURIComponent(role || "")}`,
+        );
+      }
 
       const newUser = await User.create({
         username,
-        email,
+        email: normalizedEmail,
         password,
         role,
       });
@@ -679,7 +723,10 @@ class Controller {
 
       res.redirect("/login");
     } catch (error) {
-      if (error.name === "SequelizeValidationError") {
+      if (
+        error.name === "SequelizeValidationError" ||
+        error.name === "SequelizeUniqueConstraintError"
+      ) {
         const errors = error.errors.map((el) => el.message);
         const { username, email, role } = req.body;
         return res.redirect(
