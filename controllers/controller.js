@@ -484,12 +484,13 @@ class Controller {
       if (!line_items.length) return res.redirect("/orders");
 
       const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+      const baseUrl = (process.env.BASE_URL || "").replace(/\/+$/, "");
 
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
         line_items,
-        success_url: `${process.env.BASE_URL}/orders/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${order.id}`,
-        cancel_url: `${process.env.BASE_URL}/orders/checkout/cancel?order_id=${order.id}`,
+        success_url: `${baseUrl}/orders/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${order.id}`,
+        cancel_url: `${baseUrl}/orders/checkout/cancel?order_id=${order.id}`,
         client_reference_id: String(order.id),
         metadata: {
           orderId: String(order.id),
