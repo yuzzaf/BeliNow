@@ -5,6 +5,8 @@ const { isLoggedIn, isAdmin } = require("../middlewares/middleware");
 
 // Public
 router.get("/", Controller.productList);
+// Public detail (must be last so it does not catch /add)
+router.get("/:id", Controller.productDetail);
 
 // Protected
 router.use(isLoggedIn);
@@ -15,6 +17,4 @@ router.get("/:id/edit", Controller.getEditProduct);
 router.post("/:id/edit", Controller.postEditProduct);
 router.post("/:id/delete", Controller.deleteProduct);
 
-// Public detail (must be last so it does not catch /add)
-router.get("/:id", Controller.productDetail);
 module.exports = router;
